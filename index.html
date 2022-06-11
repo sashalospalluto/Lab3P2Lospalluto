@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEGUNDO PARCIAL, Sasha Lospalluto</title>
+    
+    <!-- CSS -->
+    <style>
+body
+{
+    display: flex;
+    justify-content: center;
+}
+#div-formulario
+{
+    display: none;
+}
+
+.datosDeAlumnos
+{
+     display: block;
+} 
+
+.datosDeDocentes
+{
+     display: none;
+} 
+
+#div-cuadroPrincipal
+{
+    background-color: blueviolet;
+    padding: 30px;
+    margin-top: 120px;
+}
+
+#div-formulario
+{
+    background-color: blueviolet;
+    padding: 30px;
+    margin-top: 120px;
+}
+
+#div-errorGeneral
+{
+    display: none;
+}
+    </style>
+
+</head>
+<body>
+    <div id="div-cuadroPrincipal">
+
+        <h1>Formulario lista</h1>
+
+        <br><br>
+    
+        <table border="1" id = "tablaRegistros">
+            <thead>
+    
+                <tr id="tr-tablaRegistros">
+                    <th id="th-id" class="seccion-id"><button>ID</button></th>
+                    <th class="seccion-fabricante"><button>FABRICANTE</button></th>
+                    <th class="seccion-modelo"><button>MODELO</button></th>
+                    <th class="seccion-añoLanzamiento"><button>ANO LANZAMIENTO</button></th>
+                    <th class="seccion-cantidadPuertas"><button>CANTIDAD PUERTAS</button></th>
+                    <th class="seccion-transmision4x4"><button>TRANSIMISION 4X4</button></th>
+                    <th class="seccion-modificar" onclick=""><button>MODIFICAR</button></th>
+                    <th class="seccion-eliminar" onclick=""><button>ELIMINAR</button></th>
+                </tr>
+                
+            </thead>
+            <tbody id="cuerpo">
+    
+            </tbody>
+        </table>
+    
+        <br><br>
+    
+        <button onclick="agregarVehiculo()">AGREGAR</button>
+    </div>
+
+    <div id="div-formulario">
+        <h2>Form de alta</h2>
+        <form id="form-registro">
+            <label>ID</label>
+            <input id="id" type="text"> 
+            <br> <br>
+            <label>FABRICANTE</label>
+            <input id="fabricante" type="text"> 
+            <br> <br>
+            <label>MODELO</label>
+            <input id="modelo" type="text">
+            <br> <br>
+            <label>AÑOLANZAMIENTO</label>
+            <input id="añoLanzamiento" type="text">
+            <br> <br>
+            <label>Tipo</label>
+            <select id = "tipoVehiculo" onchange="validarTipoVehiculo()">
+                <option value="Auto" selected>Auto</option>
+                <option value="Camioneta">Camioneta</option>
+            </select>
+            <br> <br>
+            <div class="datosDeAuto">
+                <label>CantidadPuertas</label>
+                <input id="cantidadPuertas" type="text">
+                <br> <br>
+            </div>
+            <br> <br>
+            <div class="datosDeCamioneta">
+                <label>transmision4x4<input id="transmision4x4" type="text"></label>
+                <br> <br>
+            </div>
+            <br> <br>
+
+            <button onclick=agregarRegistro() class="btn-agregar" type="button">AGREGAR</button>
+            <button onclick=volverAtras() type="button">CANCELAR</button>
+        </form>
+
+    </div>
+
+    <div id="div-errorGeneral">
+        <img src="http://www.torresburriel.com/weblog/wp-content/uploads/2017/08/5201817488_399a04ef74_b.jpg"/>
+    </div>
+
+</body>
+
+<!-- JAVASCRIPT -->
+<script>
+
+class Vehiculo
+{
+    constructor (id, fabricante, modelo, añoLanzamiento)
+    {
+        this.id = id
+        this.fabricante = fabricante;
+        this.modelo = modelo;
+        this.añoLanzamiento = añoLanzamiento;
+    }
+
+    toJsonString(boolean)
+    {
+        if(!boolean)
+        {
+            return JSON.stringify({fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento });
+        }
+        else
+        {
+            return JSON.stringify({ id: this.id, fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento });
+        }
+    }
+}
+
+class Auto extends Vehiculo
+{
+    constructor (id, fabricante, modelo, añoLanzamiento, cantidadPuertas)
+    {
+        super(id, fabricante, modelo, añoLanzamiento);
+        this.cantidadPuertas = cantidadPuertas;
+    }
+
+    toJsonString(boolean)
+    {
+        if(!boolean)
+        {
+            return JSON.stringify({fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento, cantidadPuertas: this.cantidadPuertas });
+        }
+        else
+        {
+            return JSON.stringify({id: this.id, fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento, cantidadPuertas: this.cantidadPuertas });
+        }
+    }
+}
+
+class Camioneta extends Vehiculo
+{
+    constructor(id, fabricante, modelo, añoLanzamiento, transmision4x4)
+    {
+        super(id, fabricante, modelo, añoLanzamiento);
+        this.transmision4x4 = transmision4x4;
+    }
+
+    toJsonString(boolean)
+    {
+        if(!boolean)
+        {
+            return JSON.stringify({fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento, transmision4x4: this.transmision4x4 });
+        }
+        else
+        {
+            return JSON.stringify({id: this.id, fabricante: this.fabricante, modelo: this.modelo, añoLanzamiento: this.añoLanzamiento, transmision4x4: this.transmision4x4 });
+        }
+    }
+}
+
+function generadorArrayV(json)
+{
+    var arrayDatos = [];
+
+    json.forEach(objeto => {
+        if(objeto.id && objeto.fabricante && objeto.modelo && objeto.añoLanzamiento)
+        {
+            if(objeto.cantidadPuertas)
+            {
+                arrayDatos.push(new Auto(objeto.id, objeto.fabricante, objeto.modelo, objeto.añoLanzamiento, objeto.cantidadPuertas));
+            }
+            else
+            {
+                arrayDatos.push(new Camioneta(objeto.id, objeto.fabricante, objeto.modelo, objeto.añoLanzamiento, objeto.transmision4x4));
+            }
+        }
+    });
+
+    return arrayDatos;
+}
+
+function vaciarTabla()
+{
+    let cuerpo = document.getElementById("cuerpo");
+    cuerpo.innerHTML="";
+}
+
+function cargarTabla(miArray)
+{
+    vaciarTabla();
+    lista = generadorArrayV(miArray);
+    
+    lista.forEach(element => {
+        
+        let fila = document.createElement("tr");
+        
+        let id = document.createElement("td");
+        id.classList.add("seccion-id");
+        
+        let fabricante = document.createElement("td");
+        fabricante.classList.add("seccion-fabricante");
+
+        let modelo = document.createElement("td");
+        modelo.classList.add("seccion-modelo");
+
+        let añoLanzamiento = document.createElement("td");
+        añoLanzamiento.classList.add("seccion-añoLanzamiento");
+
+        let cantidadPuertas = document.createElement("td");
+        cantidadPuertas.classList.add("seccion-cantidadPuertas");
+
+        let transmision4x4 = document.createElement("td");
+        transmision4x4.classList.add("seccion-transmision4x4");
+
+
+        id.appendChild(document.createTextNode(element.id));
+        fila.appendChild(id);
+
+        fabricante.appendChild(document.createTextNode(element.fabricante));
+        fila.appendChild(fabricante);
+
+        modelo.appendChild(document.createTextNode(element.modelo));
+        fila.appendChild(modelo);
+
+        añoLanzamiento.appendChild(document.createTextNode(element.añoLanzamiento));
+        fila.appendChild(añoLanzamiento);
+
+        cantidadPuertas.appendChild(document.createTextNode(element.cantidadPuertas || "N/C"));
+        fila.appendChild(cantidadPuertas);
+
+        transmision4x4.appendChild(document.createTextNode(element.transmision4x4 || "N/C"));
+        fila.appendChild(transmision4x4);
+
+        let btnM = document.createElement('button');
+        btnM.innerText="MODIFICAR";
+        btnM.style.background="blue";
+
+        let btnModificar = document.createElement("td");
+        btnModificar.classList.add("seccion-modificar");
+        btnModificar.appendChild(btnM);
+        fila.appendChild(btnModificar);
+
+        let btnE = document.createElement('button');
+        btnE.innerText="ELIMINAR";
+        btnE.style.background="RED";
+
+        let btnEliminar = document.createElement("td");
+        btnEliminar.classList.add("seccion-eliminar");
+        btnEliminar.appendChild(btnE);
+        fila.appendChild(btnEliminar);
+
+        btnEliminar.addEventListener("click", async(event) =>{
+
+            let clases = event.target.parentNode.parentNode;
+            let id = clases.getElementsByClassName("seccion-id")[0].innerText;
+            
+            id = parseInt(id);
+            
+            if(await deleteVehiculoAsync(id))
+            {
+                event.target.parentNode.parentNode.remove();
+            }            
+            
+        });
+        
+
+        btnModificar.addEventListener("click",async(event) =>{
+            
+            let clases = event.target.parentNode.parentNode;
+            let id = clases.getElementsByClassName("seccion-id")[0].innerText;
+            
+            console.log(encontrado);
+            if(await updateVehiculoAsync(encontrado))
+            {
+                encontrado= arrayDeObjetos.find(item=>item.id==id);
+
+            }
+
+        });
+        
+        document.getElementById("cuerpo").appendChild(fila);
+    });
+
+    return lista;
+}
+
+async function deleteVehiculoAsync(idAEliminar) 
+{
+    
+    const constRequestDetail = {
+        method: 'DELETE',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({ id: idAEliminar })
+    };
+
+    try
+    {
+        let response = await fetch('http://localhost:5000/vehiculos/eliminarvehiculo', constRequestDetail);
+        if (response.status == 200)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }catch(err)
+    {
+        console.error(err);
+    }
+}
+
+async function updateVehiculoAsync(miObjeto) 
+{
+    
+    const constRequestDetail = {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        body: miObjeto.toJsonString(true)
+    };
+
+    try
+    {
+        if(miObjeto instanceof Auto)
+        {
+            let response = await fetch('http://localhost:5000/vehiculos/modificarauto', constRequestDetail);
+        }
+        else
+        {
+            let response = await fetch('http://localhost:5000/vehiculos/modificarcamioneta', constRequestDetail);
+        }
+        if (response.status == 200)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }catch(err)
+    {
+        console.error(err);
+    }
+}
+
+/* Cargo la tabla con mi json */
+function GetPersonasFetch() 
+{
+    try
+    {
+        return fetch("http://localhost:5000/vehiculos/vehiculos")
+        .then(response => {
+            
+            switch(response.status)
+            {
+                case 200:
+                    return response.json();
+            }
+            
+            if(response.status==200)
+            {
+                response.json()
+            }
+           
+        });
+    } catch (error) 
+    {
+        console.log("error");
+        errorEnElSistema();
+    }
+}
+
+/* async function getDatos()
+{
+    try 
+    {
+        let respuesta = await GetPersonasFetch();    
+        return respuesta;
+    } catch (error) 
+    {
+        console.log("error");
+        errorEnElSistema();
+    }
+} */
+
+GetPersonasFetch().then(data => arrayDeObjetos = cargarTabla(data));
+
+/* fetch("http://localhost:5000/personas")
+.then( (response) =>  response.json() )
+.then( (data) => arrayDeObjetos = cargarTabla(data)); */
+
+//arrayDeObjetos = cargarTabla(data);
+
+function verificarCheckBox()
+{
+    var checked = this.checked;
+    
+    claseAModificar = this.id;
+    var elems = document.getElementsByClassName(claseAModificar); 
+    
+    if(checked)
+    {
+        for(var i = 0; i < elems.length; i++)
+        {
+            elems[i].style.display = "";
+        } 
+    }
+    else
+    {
+        for(var i = 0; i < elems.length; i++)
+        {
+            elems[i].style.display = "none";
+        } 
+    }
+    
+    return checked;
+}
+
+function traerDatosTabla()
+{
+    opcionSeleccionada = selection.options[selection.selectedIndex].value;
+
+    switch (opcionSeleccionada) {
+        case 'Alumnos':
+            nuevoArray = arrayDeObjetos.filter((a)=>{ 
+                return a.constructor.name == "Alumno" ? a : false;
+            });
+            break;
+        case 'Docentes':
+            nuevoArray = arrayDeObjetos.filter((a)=>{ 
+                return a.constructor.name == "Docente" ? a : false;
+            });
+            break;
+        default:
+            nuevoArray = arrayDeObjetos;
+            break;
+    }
+
+    return nuevoArray;
+}
+
+function agregarVehiculo()
+{
+    document.querySelector("#id").disabled = true;
+
+    document.querySelector("#div-cuadroPrincipal").style.display = "none";
+    document.querySelector("#div-formulario").style.display = "block";
+
+    document.querySelector(".btn-agregar").disabled = false;
+
+    document.querySelector(".datosDeCamioneta").style.display = "none";
+}
+
+function errorEnElSistema()
+{
+    document.querySelector("#div-cuadroPrincipal").style.display = "none";
+    document.querySelector("#div-errorGeneral").style.display = "block";
+    console.log("llego a la funcion");
+}
+
+function error204()
+{
+    document.querySelector("#div-cuadroPrincipal").style.display = "none";
+    document.querySelector("#div-errorGeneral").style.display = "block";
+    console.log("error 204");
+}
+
+function error301()
+{
+    document.querySelector("#div-cuadroPrincipal").style.display = "none";
+    document.querySelector("#div-errorGeneral").style.display = "block";
+    console.log("error 204");
+}
+
+function volverAtras()
+{
+    document.querySelector("#div-formulario").style.display = "none";
+    document.querySelector("#div-cuadroPrincipal").style.display = "block";
+    document.getElementById("form-registro").reset();
+}
+
+function crearObjeto()
+{
+    id = (document.getElementById("id")).value;
+    fabricante = (document.getElementById("fabricante")).value;
+    modelo = (document.getElementById("modelo")).value;
+    añoLanzamiento = parseInt((document.getElementById("añoLanzamiento")).value);
+    cantidadPuertas = parseInt((document.getElementById("cantidadPuertas")).value);
+    transmision4x4 = (document.getElementById("transmision4x4")).value;
+
+    if(transmision4x4 == "")
+    {
+        objeto = new Auto(id,fabricante,modelo,añoLanzamiento,cantidadPuertas);
+    }
+    else
+    {
+        objeto = new Camioneta(id,fabricante,modelo,añoLanzamiento,transmision4x4);
+    }
+
+    return objeto;
+}
+
+function agregarRegistro()
+{
+
+    miObjeto = crearObjeto();
+    console.log(miObjeto);
+    
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if(this.readyState == 4 && this.status == 200)
+        {
+            const jsonResponse = JSON.parse(this.responseText);
+            miObjeto.id = jsonResponse.id;
+            arrayDeObjetos.push(miObjeto);
+            cargarTabla(arrayDeObjetos);
+            console.log(miObjeto.toJsonString(false));
+            volverAtras();
+        }
+        else if(this.readyState == 4 && this.status != 200)
+        {
+            alert("error");
+            volverAtras();
+        }
+    };
+    
+    if(miObjeto instanceof Auto)
+    {
+        xhttp.open("PUT", "http://localhost:5000/Vehiculos/InsertarAuto", true);
+    }
+    else
+    {
+        xhttp.open("PUT", "http://localhost:5000/vehiculos/Insertarcamioneta", true);
+    }
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(miObjeto.toJsonString(false)); 
+
+}
+
+function validarTipoVehiculo()
+{
+    let selection = document.getElementById("tipoVehiculo");
+    let opcionSeleccionada = selection.options[selection.selectedIndex].value;
+    switch (opcionSeleccionada) {
+        case 'Auto':
+            document.querySelector(".datosDeCamioneta").style.display = "none";
+            document.querySelector(".datosDeAuto").style.display = "block";
+            break;
+        case 'Camioneta':
+            document.querySelector(".datosDeAuto").style.display = "none";
+            document.querySelector(".datosDeCamioneta").style.display = "block";
+            break;
+    }
+
+    return opcionSeleccionada;
+}
+
+function asignarDatosAlForm(array)
+{
+    document.getElementById("id").value = array[0];
+    document.getElementById("apellido").value = array[1];
+    document.getElementById("nombre").value = array[2];
+    document.getElementById("dni").value = array[3];
+
+    if(array[4] == undefined)
+    {
+        document.getElementById("cursoLetra").value = array[6];
+        document.getElementById("cursoNumero").value = array[7];
+
+        document.getElementById("tipoPersona").value = "Alumno";
+        validarTipoUsuario();
+    }else
+    {
+        document.getElementById("materia").value = array[4];
+        document.getElementById("año").value = array[5];
+        document.getElementById("tipoPersona").value = "Docente";
+        validarTipoUsuario();
+    }
+}
+
+function eliminarRegistro()
+{
+    id = (document.getElementById("id")).value;
+
+    arrayDeObjetos = arrayDeObjetos.filter((item) => item.id != id);
+
+    cargarTabla(arrayDeObjetos);
+    volverAtras();
+}
+
+
+function modificarRegistro()
+{
+    unObjeto = crearObjeto();
+
+    if(!Number.isNaN(parseInt(unObjeto.dni)))
+    {
+        if(unObjeto.constructor.name == "Alumno")
+        {
+            if(!Number.isNaN(parseInt(unObjeto.cursoNumero)))
+            {
+                arrayDeObjetos.map(e=>{
+                    if(e.id == unObjeto.id)
+                    {
+                        e.apellido = unObjeto.apellido;
+                        e.nombre = unObjeto.nombre;
+                        e.dni = unObjeto.dni;
+            
+                        if(e.constructor.name == "Alumno")
+                        {
+                            e.cursoLetra = unObjeto.cursoLetra;
+                            e.cursoNumero = unObjeto.cursoNumero;
+                        }
+                        else
+                        {
+                            e.materia = unObjeto.materia;
+                            e.año = unObjeto.año;
+                        }
+                    }
+                });
+                
+                volverAtras();
+                cargarTabla(arrayDeObjetos);
+            }
+            else
+            {
+                alert("NO ES UN año VALIDO");
+            }
+        }
+        else
+        {
+            if(!Number.isNaN(parseInt(unObjeto.año)))
+            {
+                arrayDeObjetos.map(e=>{
+                    if(e.id == unObjeto.id)
+                    {
+                        e.apellido = unObjeto.apellido;
+                        e.nombre = unObjeto.nombre;
+                        e.dni = unObjeto.dni;
+            
+                        if(e.constructor.name == "Alumno")
+                        {
+                            e.cursoLetra = unObjeto.cursoLetra;
+                            e.cursoNumero = unObjeto.cursoNumero;
+                        }
+                        else
+                        {
+                            e.materia = unObjeto.materia;
+                            e.año = unObjeto.año;
+                        }
+                    }
+                });
+                
+                volverAtras();
+                cargarTabla(arrayDeObjetos);
+            }
+            else
+            {
+                alert("NO ES UN año VALIDO");
+            }
+        }
+    
+    }
+    else
+    {
+        alert("NO ES UN DNI VALIDO");
+    }
+
+    //arrayDeObjetos = arrayDeObjetos.filter((item) => item.id != id);
+}
+
+
+/* Valido el filtrado de datos */
+var selection = document.getElementById("st-filtrado");
+
+/* Calculo el promedio */
+
+let seleccionTr = document.getElementById("cuerpo");
+
+seleccionTr.addEventListener("dblclick", function(item) 
+{
+    
+    var row = item.path[1];
+
+    var row_value = [];
+
+    for (var j = 0; j < row.cells.length; j++) 
+    {
+        if(row.cells[j].innerHTML == "N/C")
+        {
+            row_value.push(undefined);
+        }
+        else
+        {
+            row_value.push(row.cells[j].innerHTML);
+        }
+    }
+    
+    agregarVehiculo();
+
+    document.querySelector("#id").disabled = true;
+    document.querySelector("#tipoPersona").disabled = true;
+    document.querySelector(".btn-eliminar").disabled = false;
+    document.querySelector(".btn-modificar").disabled =false;
+    document.querySelector(".btn-agregar").disabled =true;
+
+    asignarDatosAlForm(row_value);
+    console.log(arrayDeObjetos);
+    }); 
+</script>
+
+</html>
